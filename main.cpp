@@ -38,11 +38,24 @@ void setupSinricPro() {
    
   SinricPro.begin(APP_KEY, APP_SECRET);
 }
+// setup function for WiFi connection
+void setupWiFi() {
+  Serial.printf("\r\n[Wifi]: Connecting");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.printf(".");
+    delay(250);
+  }
+
+  Serial.printf("connected!\r\n[WiFi]: IP-Address is %s\r\n", WiFi.localIP().toString().c_str());
+}
 
 // main setup function
 void setup() {
   
   Serial.begin(BAUD_RATE); Serial.printf("\r\n\r\n");
+   setupWiFi();
   setupSinricPro();
 }
 
