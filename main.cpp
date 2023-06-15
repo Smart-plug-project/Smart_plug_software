@@ -16,6 +16,8 @@
 #endif
 
 #include "SinricPro.h"
+#include "SinricProSwitch.h"
+
 #define WIFI_SSID         "OnePlus 9 5G"
 #define WIFI_PASS         "e2cxwz37"
 #define APP_KEY           "1357066d-0b38-47c6-98d6-3b9cd933b937"
@@ -28,17 +30,12 @@
 #define BAUD_RATE         9600                // Change baudrate to your need
 
 
-
-// setup function for SinricPro
-void setupSinricPro() {
-  // setup SinricPro
-  SinricPro.onConnected([](){ Serial.printf("Connected to SinricPro\r\n"); }); 
-  SinricPro.onDisconnected([](){ Serial.printf("Disconnected from SinricPro\r\n"); });
-  SinricPro.restoreDeviceStates(true); // Uncomment to restore the last known state from the server.
-   
-  SinricPro.begin(APP_KEY, APP_SECRET);
+bool onPowerState1(const String &deviceId, bool &state) {
+ Serial.printf("Device 1 turned %s", state?"on":"off");
+ digitalWrite(RELAYPIN_1, state ? LOW:HIGH);
+ return true; // request handled properly
 }
-// setup function for WiFi connection
+
 void setupWiFi() {
   Serial.printf("\r\n[Wifi]: Connecting");
   WiFi.begin(WIFI_SSID, WIFI_PASS);
@@ -50,6 +47,22 @@ void setupWiFi() {
 
   Serial.printf("connected!\r\n[WiFi]: IP-Address is %s\r\n", WiFi.localIP().toString().c_str());
 }
+
+// setup function for SinricPro
+void setupSinricPro() {
+  // setup SinricPro
+   // add devices and callbacks to SinricPro
+  pinMode(RELAYPIN_1, OUTPUT);
+   SinricProSwitch& mySwitch1 = SinricPro[SWITCH_ID_1];
+  mySwitch1.onPowerState(onPowerState1);
+  SinricPro.onConnected([](){ Serial.printf("Connected to SinricPro\r\n"); }); 
+  SinricPro.onDisconnected([](){ Serial.printf("Disconnected from SinricPro\r\n"); });
+  SinricPro.restoreDeviceStates(true); // Uncomment to restore the last known state from the server.
+   
+  SinricPro.begin(APP_KEY, APP_SECRET);
+}
+// setup function for WiFi connection
+
 
 // main setup function
 void setup() {
